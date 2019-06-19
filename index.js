@@ -3,6 +3,18 @@ const stories = require('./stories');
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log(`Request details. 
+    Method: ${req.method}. Original url: ${req.originalUrl}`
+  );
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+})
+
 app.get('/ping', (req, res) => {
   res.send('pong');
 });
