@@ -1,4 +1,5 @@
 const express = require('express');
+const request = require('request');
 const stories = require('./stories');
 
 const app = express();
@@ -29,6 +30,14 @@ app.get('/stories/:title', (req, res) => {
     story => story.title.includes(title)
   );
   res.json(filteredStories);
+});
+
+app.get('/topstories', (req, res) => {
+  request('https://hacker-news.firebaseio.com/v0/topstories.json',
+    (error, req, body) => {
+      res.send(JSON.parse(body));
+    }
+  );
 })
 
 const PORT = 3000;
