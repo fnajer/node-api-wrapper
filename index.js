@@ -33,7 +33,7 @@ app.get('/stories/:title', (req, res) => {
 });
 
 app.get('/topstories', (req, res, next) => {
-  request('https://hacker-news.fihrebaseio.com/topstories.json',
+  request('https://hacker-news.firebaseio.com/v0/topstories.json',
     (error, responce, body) => {
       if (error || responce.statusCode !== 200) {
         const err = new Error('Error requesting top stories');
@@ -46,7 +46,35 @@ app.get('/topstories', (req, res, next) => {
         return next(err);
       }
 
-      res.send(JSON.parse(body));
+      const topStoriesIds = JSON.parse(body);
+      const limit = 10;
+
+      Promise.all(
+        topStoriesIds.slice(0, limit).map(storyId => {
+          return new Promise((resolve, reject) => {
+            request(`https://hacker-news.firebadseio.com/v0/item/${storyId}.json`,
+              (error, request, body) => {
+                if (error || request.statusCode !== 200) {
+                  const err = new Error('Error requesting story item');
+
+                  if (responce) 
+                    err.code = responce.statusCode;
+                  else 
+                    err.code = 500;
+
+                  return reject(err);
+                }
+
+                resolve(JSON.parse(body));
+              }
+            );
+          })
+        })
+      )
+      .then(storiesData => {
+        res.json(storiesData);
+      })
+      .catch(err => next(err));
     }
   );
 })
