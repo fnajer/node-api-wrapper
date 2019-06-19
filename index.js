@@ -32,13 +32,31 @@ app.get('/stories/:title', (req, res) => {
   res.json(filteredStories);
 });
 
-app.get('/topstories', (req, res) => {
-  request('https://hacker-news.firebaseio.com/v0/topstories.json',
-    (error, req, body) => {
+app.get('/topstories', (req, res, next) => {
+  request('https://hacker-news.fihrebaseio.com/topstories.json',
+    (error, responce, body) => {
+      if (error || responce.statusCode !== 200) {
+        const err = new Error('Error requesting top stories');
+
+        if (responce) 
+          err.code = responce.statusCode;
+        else 
+          err.code = 500;
+        
+        return next(err);
+      }
+
       res.send(JSON.parse(body));
     }
   );
 })
+
+app.use((error, req, res, next) => {
+  res.status(error.code).json({
+    type: 'error',
+    message: error.message
+  });
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
