@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const request = require('request');
 const stories = require('./stories');
 
@@ -14,7 +15,9 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
-})
+});
+
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('/ping', (req, res) => {
   res.send('pong');
@@ -52,7 +55,7 @@ app.get('/topstories', (req, res, next) => {
       Promise.all(
         topStoriesIds.slice(0, limit).map(storyId => {
           return new Promise((resolve, reject) => {
-            request(`https://hacker-news.firebadseio.com/v0/item/${storyId}.json`,
+            request(`https://hacker-news.firebaseio.com/v0/item/${storyId}.json`,
               (error, request, body) => {
                 if (error || request.statusCode !== 200) {
                   const err = new Error('Error requesting story item');
@@ -86,7 +89,7 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`listen on ${PORT}`)
 });
